@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elite Board // PASGABAT</title>
+    <link rel="icon" type="image/png" href="psgbt.jpeg">
+    
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark: #050505;
+            --card-bg: #0a0a0a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: var(--dark);
+            color: #fff;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+            padding-top: 80px;
+        }
+
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; display: flex; justify-content: center; align-items: center;
+            z-index: 9999; transition: opacity 0.3s ease;
+        }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(212, 175, 55, 0.2);
+            border-top: 3px solid var(--gold);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        nav { 
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%); 
+            z-index: 1000; background: rgba(10,10,10,0.9); 
+            padding: 10px 20px; border-radius: 50px; border: 1px solid var(--gold); 
+            display: flex; gap: 15px; width: auto;
+        }
+        nav a { color: #fff; text-decoration: none; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { font-size: 24px; color: var(--gold); letter-spacing: 4px; font-weight: 800; }
+
+        .member-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr); 
+            gap: 15px;
+            padding: 0 15px 50px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #222;
+            padding: 20px 10px;
+            text-align: center;
+            border-radius: 15px;
+            cursor: pointer;
+            grid-column: span 2;
+        }
+
+        .card:nth-child(1), .card:nth-child(2) { grid-column: span 3; }
+
+        .profile-img {
+            width: 80px; height: 80px;
+            border-radius: 50%; border: 2px solid var(--gold);
+            object-fit: cover; margin-bottom: 12px;
+            background: #111;
+        }
+
+        .card h3 { font-size: 14px; color: var(--gold); margin-bottom: 4px; }
+        .card p { font-size: 10px; color: #777; text-transform: uppercase; font-weight: bold; }
+
+        #modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 10000;
+            justify-content: center; align-items: center; padding: 20px;
+        }
+
+        .modal-content {
+            background: #111; border: 1px solid var(--gold);
+            padding: 30px 20px; border-radius: 20px;
+            max-width: 350px; width: 100%; text-align: center;
+        }
+
+        .m-img { width: 100px; height: 100px; border-radius: 50%; border: 2px solid var(--gold); object-fit: cover; margin-bottom: 15px; }
+        .m-desc { font-size: 13px; color: #ccc; line-height: 1.5; margin-top: 15px; border-top: 1px solid #222; padding-top: 15px; }
+        .close-btn { background: var(--gold); color: #000; border: none; padding: 8px 20px; border-radius: 5px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+
+        @media (max-width: 600px) {
+            .member-grid { grid-template-columns: 1fr; }
+            .card, .card:nth-child(1), .card:nth-child(2) { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader"><div class="spinner"></div></div>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="livechat.html">Chat</a>
+        <a href="anggota.html">Anggota</a>
+    </nav>
+
+    <header><h1>Alliance</h1></header>
+
+    <div class="member-grid" id="mGrid"></div>
+
+    <div id="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img src="" id="m-img" class="m-img">
+            <h2 id="m-name" style="color:var(--gold); font-size: 20px;"></h2>
+            <p id="m-role" style="font-size: 11px; color: #666; text-transform: uppercase; margin-top: 5px;"></p>
+            <p id="m-desc" class="m-desc"></p>
+            <button class="close-btn" onclick="closeModal()">CLOSE</button>
+        </div>
+    </div>
+
+    <script>
+        const members = [
+            { name: "Bro Qiqil", role: "Aqil Khoiri Arrasyid", img: "ang/ang1.jpg", desc: "Si paling 'ngeselin' tapi ngangenin yang dunianya berputar di antara buku dan Mobile Legends, Aqil adalah tipe teman yang hobi berceramah layaknya profesional meski hidupnya sendiri masih penuh draft serta selalu menutup obrolan dengan gaya formal yang bikin orang tertawa." },
+            { name: "Bro Thala", role: "Athalla Adrian Setiawan", img: "ang/ang2.jpg", desc: "Dikenal sebagai 'Suhu Coding' yang hidupnya sangat random bak hasil generate AI tanpa prompt, Athalla adalah partner mabar yang sangat setia, pendengar deep talk yang hebat, dan sosok yang perlahan mulai menunjukkan sisi dewasanya lewat kesibukan organisasi." },
+            { name: "Sist Tiroshi", role: "Khoirunnisa Hiroshi", img: "ang/ang3.jpg", desc: "'Radiator Kebahagiaan' yang energinya selalu penuh untuk menghibur grup, Nisa adalah orang yang sangat menjaga privasi namun tahu segalanya tentang orang lain—seperti seorang hacker—dan memiliki kemampuan Bahasa Arab yang luar biasa di balik sifatnya yang terkadang nyebalin." },
+            { name: "Sist Jeje", role: "Azzahra Hidayatul Jannah", img: "ang/ang4.jpg", desc: "Teman yang unik dan penuh teka-teki, Haje adalah pendengar curhat yang sangat sabar dan ramah, namun ia memiliki sisi lucu seperti gampang lupa mempertahankan streak chat dan sering berubah menjadi komedian dadakan bahkan saat sedang serius berolahraga." },
+            { name: "Sist Faizah", role: "Fatimah Noor Faizah", img: "ang/ang5.jpg", desc: "Sang 'Duta Galau' asal Piyungan yang isi kepalanya penuh dengan drama asmara, Fatimah adalah definisi sahabat paling loyal yang siap sedia 24 jam untuk bertukar cerita, meskipun terkadang ia lebih sering ngelawak di waktu yang tidak tepat saat sedang mengaji." }
+        ];
+
+        const grid = document.getElementById('mGrid');
+        
+        members.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <img src="${m.img}" class="profile-img" loading="lazy" onerror="this.src='https://via.placeholder.com/80/111/d4af37?text=...'">
+                <h3>${m.name}</h3>
+                <p>${m.role}</p>
+            `;
+            div.onclick = () => {
+                document.getElementById('m-img').src = m.img;
+                document.getElementById('m-name').innerText = m.name;
+                document.getElementById('m-role').innerText = m.role;
+                document.getElementById('m-desc').innerText = m.desc;
+                document.getElementById('modal').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+            grid.appendChild(div);
+        });
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const l = document.getElementById('loader');
+                if(l) {
+                    l.style.opacity = '0';
+                    setTimeout(() => l.style.display = 'none', 300);
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>
